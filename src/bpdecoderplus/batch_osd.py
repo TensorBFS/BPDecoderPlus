@@ -109,12 +109,13 @@ class BatchOSDDecoder:
         # Set pivot variables based on target syndromes (vectorized)
         # Build pivot row mapping
         augmented_torch = torch.from_numpy(augmented[:, :self.num_errors]).to(self.device)
+        pivot_cols_set = set(pivot_cols)
         for r in range(augmented.shape[0]):
             # Find pivot column in this row
             row_pivots = torch.where(augmented_torch[r, :] == 1)[0]
             if len(row_pivots) > 0:
                 pivot_c = row_pivots[0].item()
-                if pivot_c in pivot_cols:
+                if pivot_c in pivot_cols_set:
                     # Set this pivot variable for all candidates
                     cand_solutions[:, pivot_c] = target_syndromes[:, r]
 
@@ -176,11 +177,12 @@ class BatchOSDDecoder:
 
         # Build the row mapping: the pivot column c corresponds to which row r
         pivot_row_map = {}
+        pivot_cols_set = set(pivot_cols)
         for r in range(augmented.shape[0]):
             row_pivots = np.where(augmented[r, :self.num_errors] == 1)[0]
             if len(row_pivots) > 0:
                 col = row_pivots[0]
-                if col in pivot_cols:
+                if col in pivot_cols_set:
                     pivot_row_map[col] = r
                     solution_base[col] = augmented[r, -1]
 
